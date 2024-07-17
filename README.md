@@ -1,20 +1,23 @@
 
-
+```sql
 SELECT * FROM sales;
-
--- Find the first and latest order date
+```
+Find the first and latest order date
+```sql
 SELECT
 	MAX(saledate), 
 	MIN(saledate)
 FROM sales;
-
--- Find the details of sales where amounts are more than 2000 and boxes are < 100
+```
+Find the details of sales where amounts are more than 2000 and boxes are < 100
+```sql
 SELECT 
 * 
 FROM sales 
 WHERE Amount > 2000 AND Boxes <100;
-
--- Find the total amount of each country from the highest to the lowest
+```
+Find the total amount of each country from the highest to the lowest
+```sql
 SELECT
 *
 FROM (
@@ -24,8 +27,9 @@ FROM (
 	FROM sales s
 JOIN geo g ON g.GeoID = s.GeoID
 )t ORDER BY TotalAmount DESC;
-
--- How many shipments (sales) each of the sales persons had in the month of January 2022?
+```
+How many shipments (sales) each of the sales persons had in the month of January 2022?
+```sql
 SELECT 
 	p.Salesperson, 
 	COUNT(*) AS 'Shipment Count'
@@ -33,23 +37,22 @@ FROM sales s
 JOIN people p ON p.spid = s.spid
 WHERE SaleDate BETWEEN '2022-01-01' AND '2022-01-31'
 GROUP BY p.Salesperson;
-
--- Which shipments had under 100 customers and under 100 boxes? Did any of them occur on Wednesday?
+```
+Which shipments had under 100 customers and under 100 boxes? Did any of them occur on Wednesday?
+```sql
 SELECT
 *
 FROM sales
 WHERE Customers < 100 AND Boxes < 100;
-
 SELECT *,
 CASE WHEN WEEKDAY(saledate)=2 then 'Wednesday Shipment' 
 ELSE "" 
 END 'W Shipment'
 FROM sales
 WHERE customers <100 AND boxes<100;
-
--- Find the total number of Orders
--- Find the total number of Orders for each products
--- Additionally provide defauls such product name and sale date
+```
+Find the total number of Orders and the total number of Orders for each products
+```sql
 SELECT
 	s.saledate,
 	pr.product, 
@@ -57,10 +60,9 @@ SELECT
 	COUNT(*) OVER(PARTITION BY pr.product) OrdersByProduct
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
-
--- Find the total amount across all orders
--- And the total customer for each cost per boxes
--- Additionally provide details such cost per product name
+```
+Find the total amount across all orders and the total customer for each cost per boxes
+```sql
 SELECT * 
 FROM (
 SELECT
@@ -73,8 +75,9 @@ FROM sales s
 JOIN products pr ON pr.pid = s.pid
 ) AS TotalCustomersByCostperbox
 ORDER BY CustomersByCostperbox;
-
--- India or Australia? Who buys more chocolate boxes a monthly basis?
+```
+India or Australia? Who buys more chocolate boxes a monthly basis?
+```sql
 SELECT 
 	YEAR(saledate) Year,
 	MONTH(saledate) Month,
@@ -84,8 +87,9 @@ FROM sales s
 JOIN geo g ON g.geoid = s.geoid
 GROUP BY YEAR(saledate), MONTH(saledate)
 ORDER BY YEAR(saledate), MONTH(saledate);
-
--- Did we ship at least one box of After Nines to New Zealand on all the months
+```
+Did we ship at least one box of After Nines to New Zealand on all the months
+```sql
 SET @product_name = 'After Nines';
 SET @country_name = 'New Zealand';
 SELECT YEAR(saledate) Year, 
@@ -97,8 +101,9 @@ JOIN geo g ON g.geoid = s.geoid
 WHERE pr.product = @product_name AND g.geo = @country_name
 GROUP BY YEAR(saledate), MONTH(saledate)
 ORDER BY YEAR(saledate), MONTH(saledate);
-
--- Find the Percentage contribution of each orders to the total amount
+```
+Find the Percentage contribution of each orders to the total amount
+```sql
 SELECT
 	s.SaleDate,
 	p.Salesperson,
@@ -109,10 +114,9 @@ SELECT
 	FROM sales s
 JOIN products pr ON pr.pid = s.pid
 JOIN people p ON p.spid = s.spid;
-
--- Find the average amount across all orders
--- And find the average amount for each product
--- Additionally provide details such saledate
+```
+Find the average amount across all orders and find the average amount for each product
+```sql
 SELECT
 	s.saledate,
 	pr.product,
@@ -121,8 +125,9 @@ SELECT
 	AVG(s.amount) OVER(PARTITION BY pr.product) AvgAmountByProducts
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
-
--- Find all orders where amount are higher than the average amount across all orders
+```
+Find all orders where amount are higher than the average amount across all orders
+```sql
 SELECT
 *
 FROM (
@@ -135,10 +140,10 @@ JOIN products pr ON pr.pid = s.pid
 )t 
 WHERE amount > AvgAmount
 ORDER BY amount DESC;
-
--- Find the highest and lowest amount and boxes all orders
--- Find the highest and lowest amount and boxes for each product 
--- Additionally provide details such saledate, spid
+```
+Find the highest and lowest amount and boxes all orders
+Find the highest and lowest amount and boxes for each product 
+```sql
 SELECT
 	s.spid,
 	s.saledate,
@@ -154,8 +159,9 @@ SELECT
 	MIN(Boxes) OVER(PARTITION BY pr.product) LowesttBoxesByProduct
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
-
--- Show the Sales Person who have the highest amount sales
+```
+Show the Sales Person who have the highest amount sales
+```sql
 SELECT
 * 
 FROM (
@@ -166,8 +172,9 @@ SELECT
 FROM sales s
 JOIN people p ON p.spid = s.spid
 )t WHERE amount = HighestAmount;
-
--- Find the deviation of each amount sales from minimum and maximum amount 
+```
+Find the deviation of each amount sales from minimum and maximum amount 
+```sql
 SELECT
 	amount,
 	saledate,
@@ -176,9 +183,10 @@ SELECT
 	amount - MIN(amount) OVER() DeviationFromMin,
 	MAX(amount) OVER() - Amount DeviationFromMax
 FROM sales ;
-
--- Calculate moving average of amount for each product over time
--- Calculate moving average of amount for each product over time, including only the next order
+```
+Calculate moving average of amount for each product over time
+Calculate moving average of amount for each product over time, including only the next order
+```sql
 SELECT
 	pr.product,
 	s.amount,
@@ -187,8 +195,9 @@ SELECT
 	AVG(s.amount) OVER(PARTITION BY pr.product ORDER BY saledate ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) RollingAvg
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
-
--- Rank the Orders based on their amount sales from highest to lowest
+```
+Rank the Orders based on their amount sales from highest to lowest
+```sql
 SELECT
 	pr.product,
 	s.saledate,
@@ -198,8 +207,9 @@ SELECT
 	DENSE_RANK() OVER(ORDER BY s.amount DESC) AmountRank_Dense
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
-
--- Find the top highest amount for each product
+```
+Find the top highest amount for each product
+```sql
 SELECT
 *
 FROM (
@@ -213,8 +223,9 @@ SELECT
 FROM sales s
 JOIN products pr ON pr.pid = s.pid
 )t WHERE RankByProduct =1;
-
--- Find the 2 lowest 2 Sales Person on their total Boxes
+```
+Find the 2 lowest of Sales Person on their total Boxes
+```sql
 SELECT
 *
 FROM (
@@ -226,12 +237,13 @@ FROM sales s
 JOIN people p ON p.spid = s.spid
 GROUP BY p.salesperson
 )t WHERE RankSalesPerson <= 2;
-
--- Segment all amount sales into 5 categories : Very high, high, medium, low, very low Boxes
+```
+Segment all amount sales into 5 categories : Very high, high, medium, low, very low Boxes
+```sql
 SELECT
 *,
 CASE WHEN Buckets = 1 THEN 'Very high'
-	 WHEN Buckets = 2 THEN 'High'
+     WHEN Buckets = 2 THEN 'High'
      WHEN Buckets = 3 THEN 'Medium'
      WHEN Buckets = 4 THEN 'Low'
      WHEN Buckets = 1 THEN 'Very low'
@@ -244,8 +256,9 @@ FROM (
 	FROM sales s
     JOIN products pr ON pr.pid = s.pid
 )t;
-
--- Find the products that fall within the highest 40% of the amount
+```
+Find the products that fall within the highest 40% of the amount
+```sql
 SELECT
 *
 FROM (
@@ -256,9 +269,10 @@ SELECT
 FROM sales s
 JOIN products pr ON pr.pid = s.pid
 )t WHERE DistRank <= 0.4;
-
--- Analyze the 2021 month-over-month performance by finding the percentage change
--- in sales between the current and previous months
+```
+Analyze the 2021 month-over-month performance by finding the percentage change
+in sales between the current and previous months
+```sql
 SELECT
 *,
 CurrentMonthSales - PreviousMonthSales AS MoM_Change,
@@ -273,9 +287,10 @@ FROM sales
 GROUP BY
 	MONTH(saledate)
 )t ;
-
--- Analyze the year-over-year performance by finding the percentage change
--- in sales between the current and previous year
+```
+Analyze the year-over-year performance by finding the percentage change
+in sales between the current and previous year
+```sql
 SELECT
 *,
 CurrentYearSales - PreviousYearSales AS YoY_Change,
@@ -289,3 +304,4 @@ FROM sales
 GROUP BY
 	YEAR(saledate)
     )t;
+```
