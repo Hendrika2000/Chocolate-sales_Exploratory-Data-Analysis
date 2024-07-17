@@ -1,3 +1,29 @@
+# Chocolate Sales Analysis
+
+### Project Overview
+
+This data analysis data project aims to provide insights into the sales performance of
+a chocolate company over the past year. By analyzing various aspects of the sales data.
+We seek to identify trends, make data-driven recommendation and gain a deeper understanding of the company's performance.
+
+### Data Sources
+
+Sales Data: The primary dataset used for this analysis is the "awesome_chocolate.csv" file, containing information about each sale made by the company.
+
+### Tools
+
+--Mysql
+
+### Exploratory Data Analysis
+
+EDA involved the sales data to answear key question, such as:
+
+- What is the overall sales trends?
+- Which products category are top sellers?
+
+### Data Analysis
+
+Include some interesting code/features worked with
 
 ```sql
 SELECT * FROM sales;
@@ -27,6 +53,19 @@ FROM (
 	FROM sales s
 JOIN geo g ON g.GeoID = s.GeoID
 )t ORDER BY TotalAmount DESC;
+```
+Find the total amount of each category products from the highest to the lowest
+```sql
+SELECT
+*
+FROM (
+	SELECT
+	pr.category,
+	pr.product,
+	SUM(s.amount) OVER(PARTITION BY pr.category) TotalAmountByCategory
+	FROM sales s
+JOIN products pr ON p.PID = s.PID
+)t ORDER BY TotalAmountByCategory DESC;
 ```
 How many shipments (sales) each of the sales persons had in the month of January 2022?
 ```sql
@@ -203,7 +242,7 @@ SELECT
 	s.saledate,
 	s.amount,
 	ROW_NUMBER() OVER(ORDER BY s.amount DESC) AmountRank_Row,
-    RANK() OVER(ORDER BY s.amount DESC) AmountRank_Rank,
+    	RANK() OVER(ORDER BY s.amount DESC) AmountRank_Rank,
 	DENSE_RANK() OVER(ORDER BY s.amount DESC) AmountRank_Dense
 FROM sales s
 JOIN products pr ON pr.pid = s.pid;
@@ -216,9 +255,9 @@ FROM (
 SELECT
 	pr.product,
 	s.amount,
-    s.boxes,
-    s.customers,
-    pr.Cost_per_box,
+ 	s.boxes,
+    	s.customers,
+    	pr.Cost_per_box,
 	ROW_NUMBER() OVER(PARTITION BY pr.product ORDER BY s.amount DESC) RankByProduct
 FROM sales s
 JOIN products pr ON pr.pid = s.pid
@@ -299,9 +338,22 @@ FROM (
 SELECT
 	YEAR(saledate) OrderYear,
 	SUM(amount) CurrentYearSales,
-    LAG(SUM(amount)) OVER (ORDER BY YEAR(saledate)) PreviousYearSales
+    	LAG(SUM(amount)) OVER (ORDER BY YEAR(saledate)) PreviousYearSales
 FROM sales
 GROUP BY
 	YEAR(saledate)
     )t;
 ```
+### Result/Findings
+
+1. The company's sales and profit month-over-month performance is very unstable. The largest sales increase was 21.71% which occurred between July to Augst 2021, while the largest sales loss, which decreased -62.10% was in January to February 2020.
+2.  Product Category Bars is the best performing category in terms of sales and New Zealand is the country with the highest sales amount
+   
+
+### Recommendation
+
+Based on the analysis, we reccomend the following actions:
+- Invest in marketing and promotions during peak sales season to maximize profit
+-  Focus on expanding and promoting products in Category Bars
+  
+
